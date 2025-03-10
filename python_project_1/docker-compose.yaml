@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  web:
+    build:
+      context: .  # Ensures Docker builds from the current directory
+    ports:
+      - "5000:5000"
+    depends_on:
+      - redis
+    environment:
+      - REDIS_HOST=redis
+    restart: always  # Optional, makes sure the web service restarts on failure
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data  # Persists Redis data between restarts
+    restart: always  # Optional, makes sure the Redis service restarts on failure
+
+volumes:
+  redis_data:
+    driver: local  # Persists data locally
