@@ -23,3 +23,13 @@ services:
 volumes:
   redis_data:
     driver: local  # Persists data locally
+
+
+# redis-cli
+# 127.0.0.1:6379> KEYS *
+# 1) "visit"
+# 127.0.0.1:6379> GET visit
+# "203"
+# 127.0.0.1:6379>
+
+# docker exec -it <containerID> sh
