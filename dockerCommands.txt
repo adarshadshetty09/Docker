@@ -1,0 +1,462 @@
+docker images
+
+docker pull MySQL
+
+RUN and COPY take the layer  or act as the layer 
+
+docker images --help
+
+docker inspect <imageID>
+
+tool-> dive -> which will tell command 
+
+
+docker rmi <imageID>
+
+docker build <imageID>
+
+
+docker run -itd -P nginx sleep 1000  ,   -P whatever port assign 
+
+docker ps
+ 
+docker ps  -a
+
+docker exec -it <containerID> 
+
+docker kill <containerID>
+
+docker system prune -a   , to remove all stopped container 
+
+
+docker commit <ContainerID>   ,  to create a new image from the existing image. to save the existing images. (AUF !!!! in docker)
+
+
+
+
+docker inspect containerID
+
+
+docker run -d -P nginx
+
+docker run -d -p 50000:80 nginx
+
+docker pull postgres
+
+docker run --name myPostgresDb -p 17000:5432  -e POSTGRES_USER=postgresUser  -e POSTGRES_PASSWORD=postgresPW  -e POSTGRES_DB=postgresDB -d postgres
+    
+   
+
+docker exec containerName env
+
+
+to see the hostmachine   -> cat /etc/issue , lsb_release -a , in centos cat /etc/os-release
+
+
+
+ssh-keygen -f '/home/dopadm/.ssh/known_hosts' -R    (ssh-keygen)
+
+docker images
+
+docker inspect 
+
+docker network list 
+
+docker container list
+
+ssh root@IP_address
+
+
+
+
+
+-----------------------------------------------
+Ansible
+-----------------------------------------------
+-> ansible -m ping -i inventory.ini all   [ansible adhoc command]
+
+-> ansible -m setup -i inventory.ini all 
+
+-> ansible -m setup -i inventory.ini vm1IPv4
+
+
+
+inside the inventory.ini
+{
+192.168.1.101 ansible_user=root ansible_ssh_pass=password
+192.168.1.102 ansible_user=root ansible_ssh_pass=password
+192.168.1.103 ansible_user=root ansible_ssh_pass=password  ansible_python_interpretet=/usr/bin/python3.12
+}
+
+sudo apt-get install sshpass 
+
+*******************************************************************
+Ansible is agentless architecture
+*******************************************************************
+
+-> ansible-inventory -i inventory.ini --list
+
+
+-> ansible -m ping -i inventory.ini -u root all   [without password]
+
+
+
+clobber it will programmatically generate yaml file 
+
+-> ansible -m user -a 'name=user1' all
+
+
+-> ansible -m user -a "name=user1 update_password=always password={{ 'user1' | password_hash('sha512') }}" all
+
+-> ssh user1@vm1
+-> ssh user1@vm2
+-> ssh user1@vm3
+
+
+*****************************************************************************************************************************
+devops:dopadm:~/ANSIBLE$ssh root@192.168.1.102
+root@192.168.1.102's password:
+"System is booting up. Unprivileged users are not permitted to log in yet. Please come back later. For technical details, see pam_nologin(8)."
+Last login: Sun Mar  2 03:39:33 2025 from 192.168.1.1
+[root@1edf98857c60 ~]# rm /run/nologin
+rm: remove regular file '/run/nologin'? y
+[root@1edf98857c60 ~]# ls
+anaconda-ks.cfg  anaconda-post.log  original-ks.cfg
+[root@1edf98857c60 ~]# exit
+logout
+Connection to 192.168.1.102 closed.
+******************************************************************************************************************************
+
+-> ansible-playbook playbook.yaml
+
+-> ansible -m setup all | grep ansible_os_family
+
+-> ansible-playbook playbook1.yaml playbook2.yaml
+
+
+
+
+TOM Optimal Language
+
+
+2 GROUPS
+   1. Grouped 
+   2. Ungrouped
+
+
+
+  -> ansible -m file -a 'path=/home/dopadm/ANSIBLE/dummy state=directory' all
+
+  -> ansible -m file -a 'path=/home/dopadm/ANSIBLE/dummy/abc.txt state=touch' all
+
+  -> ansible -m file -a 'path=/root/abc.txt state=touch' all
+
+
+  -> ansible -m package -a 'name=tree state=present' all
+  -> ansible -m command -a 'tree /root' all
+  -> ansible -m command -a 'tree /home/dopadm' all
+  -> ansible -m file -a 'path=/home/dopadm state=absent' all   [remove the file]
+  -> ansible -m command -a 'uptime' all
+
+-> ssh-keygen -f '/home/dopadm/.ssh/known_hosts' -R '192.168.1.103'
+
+-> ansible -a "free -m" all   [memory usage in all the server]
+
+-> ansible -a "df -h"   [ servers have disk space available for our application]
+
+-> ansible -a "hostname"
+
+-> ansible -a "hostname" -f 1 all  [ to perform the command on each server in sequence]
+
+-> ansible -a "date" all
+
+-> ansible -s -m 
+
+->  ansible -m stat -a "path=/etc/environment" all [ Get information about a file]
+
+-> ansible -m copy -a "src=/home/dopadm/ShellScripting/simple1.sh dest=/root" all  [copy file from master to node , Copy afile to the servers]
+
+
+
+apk/dnf vm3 =  alpine:latest 
+yum /dnf =   vm2 =  centos:latest
+apt =   vm1 =  ubuntu:latest 
+
+
+alpine  centos  ubuntu 
+
+
+[ package module for different Linux distributor ]
+
+ubuntu = ansible.builtin.apt
+centos = ansible.builtin.yum
+alpine = ansible.builtin.apk
+
+
+
+-> ansible -m fetch -a "src=/root/simple1.sh dest=/home/dopadm/ANSIBLE" all   
+-> ansible-playbook -i inventory.ini -l VM1 nginx.yaml
+
+
+In Alpine - apk info apache2
+In centos - rpm -q httpd
+In Ubuntu - which apache2
+
+
+**********************************************************************
+MYSQL
+**********************************************************************
+
+sudo mysqladmin variables | grep socket
+
+sudo systemctl status MySQL
+
+*********************************************************************
+-> ansible -i inventory_aws.ini db -m ping
+
+-> ansible-inventory -i inventory_aws.ini --list
+
+
+**********************************************************************
+
+Verify the group created or NOT
+
+-> grep 'alertmanager' /etc/group
+ 
+
+***********************************************************************
+
+invoke the shell script in python 
+-> import subprocess 
+   subprocess.call([main.sh])
+
+***********************************************************************
+
+-> ansible all -m ansible.builtin.setup -a 'filter=ansible_python_version'
+
+
+***********************************
+ansible
+
+
+tags
+
+# -- step
+# -- check
+# --skip-tags
+# -- tags
+# --list-task
+# --list-hosts
+
+
+*******************************************
+
+Controlling the execution of the tasks          
+
+
+***********************************************
+Execution of playbook is called strategy (plugin)
+type :
+   1. free - it will not wait , task execution is fast as possible as possible , it will not wait other task for execution in other node.
+   2. debug 
+   3. linear strategy  [execute the task in batch by batch like 100vm first next 100-200 second....(serial)]
+
+Strategy is within the serial -> strategy come under the serial
+
+
+throttle please go through this 
+
+*******************************************************************
+
+Delegation:=>>> delegate_to vvvImp aaaashu
+
+
+*******************************************************************
+
+Error Handling 
+1. Error Failed commands
+ignore_errors: yes
+force_handlers: true  -> 
+
+
+
+
+
+2. Ensuring handler behaviour 
+3. Specifying failure states
+4. Aborting the play 
+5. Blocks
+
+
+
+
+**********************
+Handlers  ( using the handler is very good practice )
+**********************
+
+notify
+
+[ ansible builtin module ]
+import_role
+include_role
+import_playbook
+
+
+
+***************************************
+meta module 
+
+changed_when*
+meta: flush_handlers
+flush_handlers
+
+***********************
+Asynchronous Action
+***********************
+ansible all -m setup  --tree /tmp/facts
+
+https://docs.ansible.com/ansible/latest/cli/ansible.html
+
+-> ansible all -m setup -a 'filter=ansible_*_mb'
+-> ansible all -m setup -a 'filter=facter_*'
+-> ansible all -m setup -a 'gather_subset=!all,facter'
+
+***********************************
+
+cat /etc/ansible/facts.d/cluster.fact , if not present create it. with sudo permission
+
+-> ansible -m setup -a 'filter=ansible_local' all 
+
+
+-> ansible all -m shell -a 'mkdir -p /etc/ansible/facts.d; echo "{\"state\":\"green\",\"backup\":\"complete\"}" > /etc/ansible/facts.d/status.facts'  *   not a facts , only facts(execute in master and result in remote server )
+
+
+{
+
+devops:dopadm:~/ANSIBLE/ansibleClass/FACTS$  ->  ansible all -m command -a 'cat /etc/ansible/facts.d/status.facts'
+192.168.1.103 | CHANGED | rc=0 >>
+{"state":"green","backup":"complete"}
+192.168.1.102 | CHANGED | rc=0 >>
+{"state":"green","backup":"complete"}
+192.168.1.101 | CHANGED | rc=0 >>
+{"state":"green","backup":"complete"}
+devops:dopadm:~/ANSIBLE/ansibleClass/FACTS$
+
+
+}
+
+
+
+**********************************************************************
+
+devops:dopadm:~/ANSIBLE/ansibleClass/FACTS$ansible all -m shell -a 'mkdir -p /etc/ansible/facts.d && echo "{\"state\":\"green\",\"backup\":\"complete\"}" > /etc/ansible/facts.d/status.fact'
+192.168.1.103 | CHANGED | rc=0 >>
+
+192.168.1.101 | CHANGED | rc=0 >>
+
+192.168.1.102 | CHANGED | rc=0 >>
+
+devops:dopadm:~/ANSIBLE/ansibleClass/FACTS$ansible all -m setup -a "filter=ansible_local"
+192.168.1.101 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_local": {
+            "status": {
+                "backup": "complete",
+                "state": "green"
+            }
+        },
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false
+}
+192.168.1.103 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_local": {
+            "status": {
+                "backup": "complete",
+                "state": "green"
+            }
+        }
+    },
+    "changed": false
+}
+192.168.1.102 | SUCCESS => {
+    "ansible_facts": {
+        "ansible_local": {
+            "status": {
+                "backup": "complete",
+                "state": "green"
+            }
+        },
+        "discovered_interpreter_python": "/usr/libexec/platform-python"
+    },
+    "changed": false
+}
+devops:dopadm:~/ANSIBLE/ansibleClass/FACTS$
+
+
+
+**************************************
+->  ansible all -m shell -a 'mkdir -p /etc/ansible/facts.d && echo "{\"state\":\"green\",\"backup\":\"complete\"}" > /etc/ansible/facts.d/status.fact'
+->  ansible all -m setup -a "filter=ansible_local"
+
+***************************************************************
+
+Facts Caching
+
+***************************************************************
+
+Jinja2 Templating 
+  1. magic variables , hostvars , group_names , groups
+  2. hostvars: it has the all the hostname ,    [ ansible all -m debug -a 'msg={{hostvars}}']
+  3. ansible 192.168.1.103 -m debug -a "msg={{ hostvars[inventory_hostname]['ansible_user'] }}"
+
++++++++++++++++++++++++++++++++++++++++++++++++
+
+Template , in jinja2 template -> if else condition * learn ()
+
+***************************************************************************************88
+-> ansible-galaxy role init initial 
+
+
+****************************************************************************
+URL Encode in Ansible 
+
+******************************************************************************************************
+                       16 - 03 - 2025
+******************************************************************************************************
+
+1. podman pull docker.io/library/nginx
+
+
+FROM 
+LABEL maintainer  = "Adarsha D Shetty" 
+ENV     envname env_value 
+RUN  
+
+
+Container Engine is form of hypervisor lightweight hypervisor , isolated , same os  but in vm guestOS ,
+
+cgroups,  namespaces , NetLink , SELinux , capabilities , AppArmor , Netfliter ,  *** Imp
+
+https://medium.com/@kasunmaduraeng/docker-namespace-and-cgroups-dece27c209c7
+
+https://sigridjin.medium.com/docker-and-container-isolation-85e235aa5854
+
+https://medium.com/@thakuravnish2313/docker-namespace-and-cgroup-a-deep-dive-into-container-isolation-and-resource-management-f17965531b96
+
+
+Cgroups -> Means Controlled Group , 
+
+https://medium.com/@BeNitinAgarwal/understanding-the-docker-internals-7ccb052ce9fe
+
+CoW ---> Copy On Write 
+Caching -> It can cache on each layer 
+Diffing -> Finding the difference b/w two file systems
+
+Container Format is -> Lib Format 
+
+
+Try to do it docker within the docker *******************
+
+
