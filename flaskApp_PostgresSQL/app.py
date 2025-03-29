@@ -29,6 +29,12 @@ def hello():
     conn.close() # Closes the database connection.
     return f'Hello, Docker! Database version: {db_version}' # Returns a formatted string containing the greeting and the database version.
 
+"""
+(YOU WILL GET LIKE THIS) -> localhost:5000
+
+Hello, Docker! Database version: ('PostgreSQL 13.20 (Debian 13.20-1.pgdg120+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit',)
+ 
+"""
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0') # Starts the Flask development server.
     # debug=True enables debug mode, which provides detailed error messages.
