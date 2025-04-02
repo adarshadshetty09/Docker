@@ -10,4 +10,5 @@ services:
     restart: always
     volumes:
       - .:/app # Mounts your local project directory to the container
-
+      - /app/node_modules # # Prevents overwriting node_modules
+    command: npm start
