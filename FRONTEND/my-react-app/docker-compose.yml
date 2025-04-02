@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   react-app:
-    build: Dockerfile_Reduce_Image_size
+    build:
+      context: .
+      dockerfile: Dockerfile_Reduce_Image_size
     ports:
       - "8080:80"
     restart: always
