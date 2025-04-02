@@ -1,0 +1,29 @@
+# Use a smaller Node.js image for building
+FROM node:18-alpine AS build
+
+WORKDIR /app
+
+# Copy only necessary files first
+COPY package.json package-lock.json ./
+
+# Install dependencies
+RUN npm install --omit=dev
+
+# Copy the rest of the project files
+COPY . .
+
+# Build the React app
+RUN npm run build
+
+# Use an even smaller Nginx image for serving the app
+FROM nginx:alpine
+
+# Remove default Nginx page and copy built React files
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=build /app/build /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+
+# Start Nginx
+CMD ["nginx", "-g", "daemon off;"]
