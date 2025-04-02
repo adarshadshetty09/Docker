@@ -1,6 +1,5 @@
 ```
-ubuntu@ip-172-31-4-120:~$ aws ec2 describe-instances --instance-ids i-000cbb23437fd0815 --query "Reservations[0].Instances[0].SecurityGroups[0].
-GroupId"
+ubuntu@ip-172-31-4-120:~$ aws ec2 describe-instances --instance-ids i-000cbb23437fd0815 --query "Reservations[0].Instances[0].SecurityGroups[0].GroupId"
 "sg-02a2b1c4afe0b8bd2"
 ubuntu@ip-172-31-4-120:~$
 ```
