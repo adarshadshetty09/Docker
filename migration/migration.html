@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL to YugabyteDB Migration Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        pre {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap; /* Allows the content to wrap */
+            word-wrap: break-word; /* Ensures long words break */
+        }
+        code {
+            font-family: "Courier New", Courier, monospace;
+            color: #c0392b;
+            background-color: #ecf0f1;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .note {
+            background-color: #d1ecf1;
+            border-left: 6px solid #007bff;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PostgreSQL to YugabyteDB Migration Guide</h1>
+        <p>This guide will walk you through installing Docker on Ubuntu, setting up a PostgreSQL container, and then migrating a PostgreSQL database to YugabyteDB using the <code>yb-voyager</code> tool.</p>
+
+        <hr>
+
+        <h2>1. Install Docker and Set up PostgreSQL</h2>
+        <p>First, let's install Docker on your Ubuntu system and get a PostgreSQL container up and running.</p>
+        <pre><code>sudo apt-get update
+sudo apt-get install docker.io -y
+sudo usermod -aG docker $USER  # Replace with your system's username, e.g., 'ubuntu'
+newgrp docker
+sudo chmod 777 /var/run/docker.sock
+</code></pre>
+        <p>Now, pull the PostgreSQL Docker image, create a Docker network, and start your PostgreSQL container:</p>
+        <pre><code>docker pull postgres
+docker network create my_network
+docker run --name my_postgres --network my_network  -e POSTGRES_PASSWORD=mysecretpassword -p 5432:5432 -d postgres
+</code></pre>
+
+        <hr>
+
+        <h2>2. Prepare the PostgreSQL Database</h2>
+        <p>Next, we'll connect to your PostgreSQL container and set up a sample database and table within it.</p>
+        <pre><code>docker exec -it my_postgres psql -U postgres
+</code></pre>
+        <p>Once you are in the PostgreSQL prompt, run the following SQL commands:</p>
+        <pre><code>CREATE DATABASE testdb;
+\c testdb
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    email VARCHAR(100)
+);
+
+INSERT INTO users (name, email) VALUES
+('Alice', 'alice@example.com'),
+('Bob', 'bob@example.com');
+</code></pre>
+        <p>You can verify the inserted data with this command:</p>
+        <pre><code>SELECT * FROM users;
+</code></pre>
+        <p>For a larger dataset for the migration, you can insert more sample data:</p>
+        <pre><code>INSERT INTO users (name, email) VALUES
+('User1', 'user1@example.com'), ('User2', 'user2@example.com'), ('User3', 'user3@example.com'),
+('User4', 'user4@example.com'), ('User5', 'user5@example.com'), ('User6', 'user6@example.com'),
+('User7', 'user7@example.com'), ('User8', 'user8@example.com'), ('User9', 'user9@example.com'),
+('User10', 'user10@example.com'), ('User11', 'user11@example.com'), ('User12', 'user12@example.com'),
+('User13', 'user13@example.com'), ('User14', 'user14@example.com'), ('User15', 'user15@example.com'),
+('User16', 'user16@example.com'), ('User17', 'user17@example.com'), ('User18', 'user18@example.com'),
+('User19', 'user19@example.com'), ('User20', 'user20@example.com'), ('User21', 'user21@example.com'),
+('User22', 'user22@example.com'), ('User23', 'user23@example.com'), ('User24', 'user24@example.com'),
+('User25', 'user25@example.com'), ('User26', 'user26@example.com'), ('User27', 'user27@example.com'),
+('User28', 'user28@example.com'), ('User29', 'user29@example.com'), ('User30', 'user30@example.com'),
+('User31', 'user31@example.com'), ('User32', 'user32@example.com'), ('User33', 'user33@example.com'),
+('User34', 'user34@example.com'), ('User35', 'user35@example.com'), ('User36', 'user36@example.com'),
+('User37', 'user37@example.com'), ('User38', 'user38@example.com'), ('User39', 'user39@example.com'),
+('User40', 'user40@example.com'), ('User41', 'user41@example.com'), ('User42', 'user42@example.com'),
+('User43', 'user43@example.com'), ('User44', 'user44@example.com'), ('User45', 'user45@example.com'),
+('User46', 'user46@example.com'), ('User47', 'user47@example.com'), ('User48', 'user48@example.com'),
+('User49', 'user49@example.com'), ('User50', 'user50@example.com');
+</code></pre>
+
+        <hr>
+
+        <h2>3. Download and Import Sample Data</h2>
+        <p>We'll now download a larger sample dataset from Google Cloud Storage to simulate a real-world migration scenario.</p>
+        <p>First, authenticate with Google Cloud (if you haven't already):</p>
+        <pre><code>gcloud auth login
+</code></pre>
+        <p>Follow the prompts to complete the authentication in your browser. Then, copy the dataset to your local machine:</p>
+        <pre><code>gsutil cp gs://yugabyteadarsha/postgres_air_2024.sql.zip .
+</code></pre>
+        <p>Unzip the downloaded file and copy the SQL script into your PostgreSQL container:</p>
+        <pre><code>unzip postgres_air_2024.sql.zip
+docker cp postgres_air_2024.sql my_postgres:/postgres_air_2024.sql
+</code></pre>
+        <p>Now, execute the SQL script inside the PostgreSQL container to import this large dataset:</p>
+        <pre><code>docker exec -it my_postgres bash
+psql -U postgres -d testdb -f /postgres_air_2024.sql
+</code></pre>
+        <p>After the import, you can inspect the newly imported schema and tables:</p>
+        <pre><code>\c testdb
+\dn
+\dt
+</code></pre>
+        <p>Finally, drop the <code>postgres_air</code> schema to prepare for the migration process with <code>yb-voyager</code>:</p>
+        <pre><code>DROP SCHEMA postgres_air CASCADE;
+</code></pre>
+
+        <hr>
+
+        <h2>4. Build and Run YugabyteDB Docker Image</h2>
+        <p>We'll create a <code>Dockerfile</code> to build a YugabyteDB image that includes <code>yb-voyager</code>.</p>
+        <pre><code>FROM rockylinux:9
+
+ENV YB_VERSION=2.25.1.0 \
+    YB_BUILD=b381 \
+    YB_PLATFORM=linux-x86_64 \
+    OIC_URL="https://download.oracle.com/otn_software/linux/instantclient/215000"
+
+# Install dependencies
+RUN dnf install -y wget tar hostname procps glibc-langpack-en \
+    && dnf clean all
+
+# Download and extract YugabyteDB
+RUN wget https://software.yugabyte.com/releases/${YB_VERSION}/yugabyte-${YB_VERSION}-${YB_BUILD}-${YB_PLATFORM}.tar.gz \
+    && tar -xvzf yugabyte-${YB_VERSION}-${YB_BUILD}-${YB_PLATFORM}.tar.gz \
+    && rm -f yugabyte-${YB_VERSION}-${YB_BUILD}-${YB_PLATFORM}.tar.gz
+
+# Set working directory
+WORKDIR /yugabyte-${YB_VERSION}
+
+# Run post-install script
+RUN ./bin/post_install.sh
+
+RUN dnf update -y \
+    && dnf install https://downloads.yugabyte.com/repos/reporpms/yb-yum-repo-1.1-0.noarch.rpm -y \
+    && dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm -y \
+    && dnf install https://dev.mysql.com/get/mysql84-community-release-el9-1.noarch.rpm -y \
+    && dnf --disablerepo=* install https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm -y \
+    && dnf -qy module disable postgresql \
+    && dnf install perl-open.noarch -y \
+    && dnf install -y \
+           ${OIC_URL}/oracle-instantclient-tools-21.5.0.0.0-1.x86_64.rpm \
+           ${OIC_URL}/oracle-instantclient-basic-21.5.0.0.0-1.x86_64.rpm \
+           ${OIC_URL}/oracle-instantclient-devel-21.5.0.0.0-1.x86_64.rpm \
+           ${OIC_URL}/oracle-instantclient-jdbc-21.5.0.0.0-1.x86_64.rpm \
+           ${OIC_URL}/oracle-instantclient-sqlplus-21.5.0.0.0-1.x86_64.rpm \
+    && dnf update -y \
+    && dnf install yb-voyager -y
+
+RUN yb-voyager version
+
+# Expose port
+EXPOSE 15433 7000 9000 9042 5433 6379 6380 11000
+
+# Start YugabyteDB (no --docker flag)
+CMD ["./bin/yugabyted", "start", "--daemon=false"]
+</code></pre>
+        <p>Build the Docker image using the Dockerfile:</p>
+        <pre><code>docker build -f Dockerfile -t yugabyte-rocky:2.25.1 .
+</code></pre>
+        <p>Create a directory for YugabyteDB data and set the appropriate permissions:</p>
+        <pre><code>sudo mkdir -p /opt/yugabyte_data
+sudo chown -R $(whoami):$(whoami) /opt/yugabyte_data
+</code></pre>
+        <p>Now, run the YugabyteDB container, mounting the data directory and connecting it to the same network as your PostgreSQL container:</p>
+        <pre><code>docker run -d --name yugabyte \
+  --network my_network \
+  -v /opt/yugabyte_data:/root/var/data \
+  -e CONTROL_PLANE_TYPE=yugabyted \
+  -e YUGABYTED_DB_CONN_STRING="postgresql://yugabyte:yugabyte@yugabyte:5433" \
+  -p 7000:7000 \
+  -p 9000:9000 \
+  -p 15433:15433 \
+  -p 5433:5433 \
+  -p 9042:9042 \
+  yugabyte-rocky:2.25.1 \
+  ./bin/yugabyted start --background=false
+</code></pre>
+
+        <hr>
+
+        <h2>5. Configure YugabyteDB for Migration</h2>
+        <p>Connect to your running YugabyteDB container to set up a <code>ybvoyager</code> user and a target database.</p>
+        <pre><code>docker exec -it &lt;YUGABYTE_CONTAINER_ID&gt; bash # Replace &lt;YUGABYTE_CONTAINER_ID&gt; with the actual ID
+psql -U postgres
+</code></pre>
+        <p>Once inside the YugabyteDB <code>psql</code> prompt, execute these commands:</p>
+        <pre><code>CREATE USER ybvoyager PASSWORD 'password';
+GRANT USAGE ON SCHEMA public TO ybvoyager;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO ybvoyager;
+ALTER USER postgres WITH PASSWORD 'password';
+</code></pre>
+        <p>Now, create the target database in YugabyteDB with colocation enabled:</p>
+        <pre><code>./bin/ysqlsh -h &lt;YUGABYTE_CONTAINER_IP&gt; -U yugabyte -d yugabyte # Replace with container IP
+CREATE DATABASE target_db_name WITH COLOCATION=true;
+CREATE USER ybvoyager SUPERUSER PASSWORD 'password';
+</code></pre>
+
+        <hr>
+
+        <h2>6. Grant Permissions for <code>yb-voyager</code></h2>
+        <p>Run the <code>yb-voyager-pg-grant-migration-permissions.sql</code> script on your source PostgreSQL database to grant the necessary permissions to the <code>ybvoyager</code> user for migration.</p>
+        <pre><code>psql -h my_postgres \
+     -d testdb \
+     -U postgres \
+     -v voyager_user='ybvoyager' \
+     -v schema_list='postgres_air' \
+     -v is_live_migration=0 \
+     -v is_live_migration_fall_back=0 \
+     -f /opt/yb-voyager/guardrails-scripts/yb-voyager-pg-grant-migration-permissions.sql
+</code></pre>
+        <p class="note"><strong>Note:</strong> When prompted, enter the password for the <code>postgres</code> user (which is <code>mysecretpassword</code>).</p>
+
+        <hr>
+
+        <h2>7. Perform the Migration with <code>yb-voyager</code></h2>
+        <p>First, create a directory to store your <code>yb-voyager</code> export files:</p>
+        <pre><code>mkdir $HOME/export-dir
+export EXPORT_DIR=$HOME/export-dir
+</code></pre>
+
+        <h3>Assess Migration</h3>
+        <p>Assess the migration readiness of your PostgreSQL database for YugabyteDB:</p>
+        <pre><code>yb-voyager assess-migration --source-db-type postgresql \
+    --source-db-host my_postgres --source-db-user ybvoyager \
+    --source-db-password password --source-db-name testdb \
+    --source-db-schema postgres_air --export-dir /root/export-dir
+</code></pre>
+        <p class="note"><strong>Note:</strong> When prompted, type <code>Y</code> to continue with the latest stable YugabyteDB version and <code>Y</code> again to continue despite any warnings regarding <code>pg_stat_statements</code> and IOPS.</p>
+
+        <h3>Export Schema</h3>
+        <p>Export the schema from your PostgreSQL database:</p>
+        <pre><code>yb-voyager export schema \
+  --export-dir /root/export-dir \
+  --source-db-type postgresql \
+  --source-db-host my_postgres \
+  --source-db-user ybvoyager \
+  --source-db-password password \
+  --source-db-name testdb \
+  --source-db-schema postgres_air \
+  --start-clean true
+</code></pre>
+
+        <h3>Analyze Schema</h3>
+        <p>Analyze the exported schema to ensure compatibility with YugabyteDB:</p>
+        <pre><code>yb-voyager analyze-schema --export-dir /root/export-dir --output-format txt
+</code></pre>
+        <p class="note"><strong>Note:</strong> Type <code>Y</code> when prompted to continue with the latest stable YugabyteDB version.</p>
+
+        <h3>Import Schema</h3>
+        <p>Import the schema into your YugabyteDB cluster:</p>
+        <pre><code>yb-voyager import schema \
+  --export-dir /root/export-dir \
+  --target-db-host yugabyte \
+  --target-db-user yugabyte \
+  --target-db-password yugabyte \
+  --target-db-name target_db_name
+</code></pre>
+
+        <h3>Export Data</h3>
+        <p>Export the data from your PostgreSQL database:</p>
+        <pre><code>yb-voyager export data \
+  --export-dir /root/export-dir \
+  --source-db-type postgresql \
+  --source-db-host my_postgres \
+  --source-db-user ybvoyager \
+  --source-db-password password \
+  --source-db-name testdb \
+  --source-db-schema postgres_air
+</code></pre>
+
+        <h3>Check Export Data Status</h3>
+        <p>Verify the status of your data export:</p>
+        <pre><code>yb-voyager export data status --export-dir /root/export-dir
+</code></pre>
+
+        <h3>Import Data</h3>
+        <p>Import the exported data into your YugabyteDB cluster:</p>
+        <pre><code>yb-voyager import data \
+  --export-dir /root/export-dir \
+  --target-db-host yugabyte \
+  --target-db-user yugabyte \
+  --target-db-password yugabyte \
+  --target-db-name target_db_name \
+  --parallel-jobs 4 \
+  --enable-adaptive-parallelism false \
+  --batch-size 20000
+</code></pre>
+
+        <hr>
+
+        <h2>8. Finalize Migration and Clean Up</h2>
+        <p>After the data import is complete, finalize the schema in YugabyteDB.</p>
+
+        <h3>Finalize Schema</h3>
+        <pre><code>yb-voyager finalize-schema-post-data-import \
+  --export-dir /root/export-dir \
+  --target-db-host yugabyte \
+  --target-db-user yugabyte \
+  --target-db-password yugabyte \
+  --target-db-name target_db_name
+</code></pre>
+
+        <h3>End Migration</h3>
+        <p>To clean up migration artifacts and save migration reports, first create a backup directory:</p>
+        <pre><code>mkdir /root/backup-dir
+</code></pre>
+        <p>Then, end the migration, ensuring all necessary files are backed up:</p>
+        <pre><code>yb-voyager end migration --export-dir /root/export-dir \
+  --backup-log-files true \
+  --backup-data-files true \
+  --backup-schema-files true \
+  --save-migration-reports true \
+  --backup-dir /root/backup-dir
+</code></pre>
+
+        <h3>Clean Up <code>ybvoyager</code> User and Schema in PostgreSQL</h3>
+        <p>Finally, clean up the <code>ybvoyager</code> user and any related objects from your source PostgreSQL database. You'll need to connect to the <code>testdb</code> database in your <code>my_postgres</code> container:</p>
+        <pre><code>docker exec -it my_postgres psql -U postgres -d testdb
+</code></pre>
+        <p>Inside the PostgreSQL prompt, run these commands to remove the user and schema created for the migration:</p>
+        <pre><code>REASSIGN OWNED BY ybvoyager TO postgres;
+DROP OWNED BY ybvoyager;
+DROP USER ybvoyager;
+DROP SCHEMA postgres_air CASCADE;
+</code></pre>
+
+        <p>You have successfully migrated your PostgreSQL database to YugabyteDB! Do you have any further questions about migrating databases or working with YugabyteDB?</p>
+    </div>
+</body>
+</html>
