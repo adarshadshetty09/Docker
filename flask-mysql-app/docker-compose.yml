@@ -1,0 +1,50 @@
+version: "3.9"  # Specify the version of Docker Compose syntax
+
+services:
+  # ---------------------------------
+  # Flask Web Application Container
+  # ---------------------------------
+  web:
+    build: .  # Build the image from the Dockerfile in the current directory
+    container_name: flask-web  # Optional: name the container
+    ports:
+      - "5000:5000"  # Map host port 5000 to container port 5000
+    depends_on:
+      - db  # Start the 'db' service before this one
+    environment:
+      - DB_HOST=db  # Flask will connect to MySQL using this hostname
+      - DB_USER=root
+      - DB_PASSWORD=rootpass
+      - DB_NAME=testdb
+    networks:
+      - flasknet  # Attach this container to a custom network
+
+  # ------------------------------
+  # MySQL Database Container
+  # ------------------------------
+  db:
+    image: mysql:8.0  # Use the official MySQL image from Docker Hub
+    container_name: mysql-db
+    restart: always  # Automatically restart if the container stops
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass  # Root password for MySQL
+      MYSQL_DATABASE: testdb         # Auto-create a DB called testdb
+    ports:
+      - "3306:3306"  # Optional: expose MySQL port to host for external tools
+    volumes:
+      - db_data:/var/lib/mysql  # Persist MySQL data in a volume
+    networks:
+      - flasknet  # Attach to the same network as the web container
+
+# ------------------------------
+# Named Volumes
+# ------------------------------
+volumes:
+  db_data:  # This volume stores MySQL data even after the container stops
+
+# ------------------------------
+# Custom Docker Network
+# ------------------------------
+networks:
+  flasknet:  # Define a custom bridge network for internal communication
+    driver: bridge

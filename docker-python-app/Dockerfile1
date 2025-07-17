@@ -1,0 +1,11 @@
+# Use an official Python Image form Docker Hub 
+FROM python:3.10-slim
+
+# Set working diractory inside the container 
+WORKDIR /app
+
+# Copy your Python code into the container 
+COPY app1.py .
+
+# SET the default cmd to run the python app
+CMD ["python" , "app1.py"]
