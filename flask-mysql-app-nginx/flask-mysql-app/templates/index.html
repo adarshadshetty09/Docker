@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask + MySQL Form</title>
+</head>
+<body>
+    <h2>Register User</h2>
+    <form method="POST" action="/add">
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br><br>
+
+        <label>Email:</label><br>
+        <input type="email" name="email" required><br><br>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <br>
+    <a href="/users" target="_blank">View All Users (JSON)</a>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template, redirect, url_for
 import mysql.connector
 import os
 
@@ -14,7 +14,7 @@ def get_db_connection():
 
 @app.route('/')
 def home():
-    return "Flask + MySQL is running!"
+    return render_template('index.html')
 
 @app.route('/create-table')
 def create_table():
@@ -35,18 +35,17 @@ def create_table():
 
 @app.route('/add', methods=['POST'])
 def add_user():
-    data = request.get_json()
-    name = data['name']
-    email = data['email']
+    name = request.form['name']
+    email = request.form['email']
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
         conn.commit()
-        return jsonify({'message': 'User added successfully'}), 201
+        return redirect(url_for('home'))
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return f"Error: {e}"
 
 @app.route('/users')
 def list_users():
@@ -64,12 +63,14 @@ if __name__ == '__main__':
 
 
 
-'''
-TO INSERT THE DATA 
 
+# 🎉 What You Built
+# A complete full-stack mini-app
 
-curl -X POST http://localhost:5000/add \
-  -H "Content-Type: application/json" \
-  -d '{"name": "Adarsha", "email": "adarsha@example.com"}'
+# Frontend: HTML form
 
-'''
+# Backend: Flask API
+
+# Database: MySQL container
+
+# Dockerized and ready for deployment
