@@ -1,0 +1,4 @@
+---
+# vars file for user_create
+yba_user_name: "warrior"
+yba_pass: "1234"
