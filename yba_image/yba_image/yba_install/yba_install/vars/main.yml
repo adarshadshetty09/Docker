@@ -1,7 +1,7 @@
 ---
 # vars file for yba_install
 service_account_email: "yugabyte-testing@stately-winter-460115-h4.iam.gserviceaccount.com"
-project_id: "stately-winter-460115-h4"
+project_id: "spheric-mesh-465208-h9"
 yugabyte_full_version: 2024.2.2.3-b1
 yugabyte_version: 2024.2.2.3
 yugabyte_extract_path: "/home/{{ yba_user_name }}"
