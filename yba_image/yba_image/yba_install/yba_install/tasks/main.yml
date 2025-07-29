@@ -37,19 +37,12 @@
     path: /opt/yba-ctl
     state: directory
 
-- name: Ensure the secretexists, fail otherwise and return the value
-  google.cloud.gcp_secret_manager:
-    name: 'yba'
-    auth_kind: 'machineaccount'
-    service_account_email: '{{ serviceAccount }}'
-    project: '{{ projectId }}'
-    state: present
-  register: yba_license
-
-- name: Create Yugabyte License File
+- name: Create Yugabyte License File from direct license string
   ansible.builtin.copy:
-    content: "{{ yba_license.value }}"
+    content: >
+      eyJJRCI6ImN0cm1tMzA1aDVhczcydnZua2YwIiwiY3VzdG9tZXIiOiJBcnVzIiwiY3VzdG9tZXJfZW1haWxzIjpbImp1bGlldC5wQGFydXMuY28uaW4iXSwicHVycG9zZSI6MCwiZXhwaXJhdGlvbl90aW1lIjoiMjAyNS0wNC0wNCIsImNyZWF0ZV90aW1lIjoiMjAyNS0wMS0wMyJ9:MEUCIQCpf7GOOfWg0XmddS0rU6bjLoPEFmE7m3J2LmkLJgyjswIgfK+pIjDe07Fdb3uSM2kbBbrjjeP4Z1McDFtUCEQdj9k=
     dest: "{{ yugabyte_lic_path }}"
+
 
 - name: preflight check
   ansible.builtin.command: "{{ yugabyte_installer_path }}/yba-ctl preflight -f"
