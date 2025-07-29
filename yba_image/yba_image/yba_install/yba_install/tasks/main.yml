@@ -39,7 +39,7 @@
 
 - name: Ensure the secretexists, fail otherwise and return the value
   google.cloud.gcp_secret_manager:
-    name: 'yba_lic'
+    name: 'yba'
     auth_kind: 'machineaccount'
     service_account_email: '{{ serviceAccount }}'
     project: '{{ projectId }}'
