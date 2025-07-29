@@ -1,0 +1,17 @@
+- name: Setup a new user
+  hosts: default
+  gather_facts: yes
+  become: true
+  roles:
+    - role: user_create/user_create
+
+- name: Yugabyte Anywhere Installation
+  hosts: default
+  gather_facts: no
+  become: yes
+  remote_user: warrior
+  vars:
+    serviceAccount: "yugabyte-testing@stately-winter-460115-h4.iam.gserviceaccount.com"
+    projectId: "stately-winter-460115-h4"
+  roles:
+    - role: yba_install/yba_install

@@ -1,0 +1,31 @@
+---
+- name: Check if /home/warrior exists and its type
+  ansible.builtin.stat:
+    path: /home/warrior
+  register: warrior_home_stat
+
+- name: Remove /home/warrior if it exists as a file
+  ansible.builtin.file:
+    path: /home/warrior
+    state: absent
+  when: warrior_home_stat.stat.exists and warrior_home_stat.stat.isreg
+
+- name: Create group warrior
+  ansible.builtin.group:
+    name: warrior
+
+- name: Create user warrior with home directory
+  ansible.builtin.user:
+    name: warrior
+    group: warrior
+    create_home: yes
+    shell: /bin/bash
+
+- name: Ensure /home/warrior directory exists with correct owner
+  ansible.builtin.file:
+    path: /home/warrior
+    state: directory
+    owner: warrior
+    group: warrior
+    mode: '0755'
+

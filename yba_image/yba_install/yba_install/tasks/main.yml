@@ -1,0 +1,75 @@
+---
+# tasks file for yba_install
+- name: Install python3-pip
+  yum:
+    name:
+      - python3-pip
+      - wget
+      - systemd-container
+    state: present
+  become: true
+  become_user: "root"
+
+- name: Install pip packages
+  pip:
+    name:
+      - requests
+      - google-auth
+    state: present
+
+- name: Download YBA Installer
+  get_url:
+     url: "https://downloads.yugabyte.com/releases/{{yugabyte_version}}/yba_installer_full-{{yugabyte_full_version}}-linux-x86_64.tar.gz"
+     dest: "/root/yba_installer_full-{{yugabyte_full_version}}-linux-x86_64.tar.gz"
+
+- name: copy the yba_installer_full tar file to user directory
+  ansible.builtin.shell:
+    cp "/root/yba_installer_full-{{ yugabyte_full_version }}-linux-x86_64.tar.gz" "{{ yugabyte_extract_path }}"
+
+- name: Extract YBA installer
+  ansible.builtin.unarchive:
+    src: "{{ yugabyte_extract_path }}/yba_installer_full-{{ yugabyte_full_version }}-linux-x86_64.tar.gz"
+    dest: "{{ yugabyte_extract_path }}"
+    remote_src: yes
+
+- name: Ensure /opt/yba-ctl directory exists
+  ansible.builtin.file:
+    path: /opt/yba-ctl
+    state: directory
+
+- name: Ensure the secretexists, fail otherwise and return the value
+  google.cloud.gcp_secret_manager:
+    name: 'yba_lic'
+    auth_kind: 'machineaccount'
+    service_account_email: '{{ serviceAccount }}'
+    project: '{{ projectId }}'
+    state: present
+  register: yba_license
+
+- name: Create Yugabyte License File
+  ansible.builtin.copy:
+    content: "{{ yba_license.value }}"
+    dest: "{{ yugabyte_lic_path }}"
+
+- name: preflight check
+  ansible.builtin.command: "{{ yugabyte_installer_path }}/yba-ctl preflight -f"
+  register: preflight_output
+
+- name: Print preflight check
+  debug:
+    msg: "{{ preflight_output.stdout_lines }}"
+
+- name: YBA installation
+  ansible.builtin.command: "{{ yugabyte_installer_path }}/yba-ctl install -f"
+  register: YBAInstaller_output
+  #ignore_errors: yes
+
+- name: Print YBA installation
+  debug:
+    msg: "{{ YBAInstaller_output.stdout_lines }}"
+
+- name: Remove Yugabyte License File
+  ansible.builtin.file:
+    path: "{{ yugabyte_lic_path }}"
+    state: absent
+

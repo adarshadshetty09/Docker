@@ -1,0 +1,12 @@
+---
+# vars file for yba_install
+service_account_email: "yugabyte-testing@stately-winter-460115-h4.iam.gserviceaccount.com"
+project_id: "stately-winter-460115-h4"
+yugabyte_full_version: 2024.2.2.3-b1
+yugabyte_version: 2024.2.2.3
+yugabyte_extract_path: "/home/{{ yba_user_name }}"
+yugabyte_installer_path: "/home/{{ yba_user_name }}/yba_installer_full-{{ yugabyte_full_version }}"
+yugabyte_lic_path: "/opt/yba-ctl/yba.lic"
+#yba_cli_path: "{{ yugabyte_extract_path }}/yugabyte/software/{{ yugabyte_full_version }}/yb-platform/yugaware/yba-cli/yba_cli-{{ yugabyte_full_version }}-linux-amd64"
+yba_cli_path: "/opt/yugabyte/software/{{ yugabyte_full_version }}/yb-platform/yugaware/yba-cli/yba_cli-{{ yugabyte_full_version }}-linux-amd64"
+yba_user_name: "warrior"
