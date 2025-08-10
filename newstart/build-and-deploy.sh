@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # CONFIGURATION
-IMAGE_NAME="your-dockerhub-username/your-image-name"
+IMAGE_NAME="shettyadarsha/simple-python-app"
 TAG="latest"
 FULL_IMAGE_NAME="$IMAGE_NAME:$TAG"
 
