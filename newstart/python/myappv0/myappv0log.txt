@@ -1,0 +1,86 @@
+Sending build context to Docker daemon  4.608kB
+Step 1/12 : FROM python:3.10-slim AS builder
+3.10-slim: Pulling from library/python
+59e22667830b: Pulling fs layer
+12b8240e46e9: Pulling fs layer
+3fa1124e7cf3: Pulling fs layer
+00aa2453f380: Pulling fs layer
+00aa2453f380: Waiting
+12b8240e46e9: Verifying Checksum
+12b8240e46e9: Download complete
+3fa1124e7cf3: Verifying Checksum
+3fa1124e7cf3: Download complete
+00aa2453f380: Verifying Checksum
+00aa2453f380: Download complete
+59e22667830b: Verifying Checksum
+59e22667830b: Download complete
+59e22667830b: Pull complete
+12b8240e46e9: Pull complete
+3fa1124e7cf3: Pull complete
+00aa2453f380: Pull complete
+Digest: sha256:81f1cdb3770d54ecfdbddcc52c2125fce674c14a1d976dfd8f65dc0734f9c3c5
+Status: Downloaded newer image for python:3.10-slim
+ ---> 13839a48c354
+Step 2/12 : WORKDIR /app
+ ---> Running in 669bf5318a43
+ ---> Removed intermediate container 669bf5318a43
+ ---> ac7ee08adc7d
+Step 3/12 : COPY requirements.txt .
+ ---> 58235242bf93
+Step 4/12 : RUN pip install --user --no-cache-dir -r requirements.txt
+ ---> Running in 8d93fa8f3930
+Collecting Flask
+  Downloading flask-3.1.1-py3-none-any.whl (103 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 103.3/103.3 kB 693.7 kB/s eta 0:00:00
+Collecting jinja2>=3.1.2
+  Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 134.9/134.9 kB 8.3 MB/s eta 0:00:00
+Collecting itsdangerous>=2.2.0
+  Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+Collecting blinker>=1.9.0
+  Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+Collecting click>=8.1.3
+  Downloading click-8.2.1-py3-none-any.whl (102 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 102.2/102.2 kB 160.8 MB/s eta 0:00:00
+Collecting markupsafe>=2.1.1
+  Downloading MarkupSafe-3.0.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (20 kB)
+Collecting werkzeug>=3.1.0
+  Downloading werkzeug-3.1.3-py3-none-any.whl (224 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 224.5/224.5 kB 169.2 MB/s eta 0:00:00
+Installing collected packages: markupsafe, itsdangerous, click, blinker, werkzeug, jinja2, Flask
+[91m  WARNING: The script flask is installed in '/root/.local/bin' which is not on PATH.
+  Consider adding this directory to PATH or, if you prefer to suppress this warning, use --no-warn-script-location.
+[0mSuccessfully installed Flask-3.1.1 blinker-1.9.0 click-8.2.1 itsdangerous-2.2.0 jinja2-3.1.6 markupsafe-3.0.2 werkzeug-3.1.3
+[91mWARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv
+[0m[91m
+[notice] A new release of pip is available: 23.0.1 -> 25.2
+[notice] To update, run: pip install --upgrade pip
+[0m ---> Removed intermediate container 8d93fa8f3930
+ ---> 4da02ed40696
+Step 5/12 : FROM python:3.10-slim
+ ---> 13839a48c354
+Step 6/12 : WORKDIR /app
+ ---> Using cache
+ ---> ac7ee08adc7d
+Step 7/12 : COPY --from=builder /root/.local /root/.local
+ ---> e74085fb0b35
+Step 8/12 : ENV PATH=/root/.local/bin:$PATH
+ ---> Running in 622544f48920
+ ---> Removed intermediate container 622544f48920
+ ---> 33277a078f5a
+Step 9/12 : COPY . /app
+ ---> 9a562879cadd
+Step 10/12 : ENV APP_NAME="MyDockerApp"
+ ---> Running in 0df106975b73
+ ---> Removed intermediate container 0df106975b73
+ ---> a33723e92b70
+Step 11/12 : EXPOSE 5000
+ ---> Running in 97d86ac377dd
+ ---> Removed intermediate container 97d86ac377dd
+ ---> 9a0502bc635c
+Step 12/12 : CMD ["python", "app.py"]
+ ---> Running in 2b718ef14b84
+ ---> Removed intermediate container 2b718ef14b84
+ ---> 539ac95d70ef
+Successfully built 539ac95d70ef
+Successfully tagged myappv0-multistage:latest
