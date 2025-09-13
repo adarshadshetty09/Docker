@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adarsha D Shetty - DevOps Engineer Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-text">DevOps</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#home" class="nav-link">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#about" class="nav-link">About</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#skills" class="nav-link">Skills</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#projects" class="nav-link">Projects</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#contact" class="nav-link">Contact</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="title-line">Hi, I'm Adarsha D Shetty</span>
+                    <span class="title-line">DevOps Engineer & SRE</span>
+                </h1>
+                <p class="hero-description">
+                    Passionate DevOps Engineer specializing in cloud infrastructure, automation, and monitoring. 
+                    Building scalable solutions with Packer, Ansible, Terraform, and modern DevOps practices.
+                </p>
+                <div class="hero-buttons">
+                    <a href="#projects" class="btn btn-primary">View My Work</a>
+                    <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="code-animation">
+                    <div class="terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-buttons">
+                                <span class="btn-close"></span>
+                                <span class="btn-minimize"></span>
+                                <span class="btn-maximize"></span>
+                            </div>
+                            <span class="terminal-title">DevOps Terminal</span>
+                        </div>
+                        <div class="terminal-body">
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">kubectl get pods</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">NAME READY STATUS RESTARTS AGE</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">app-deployment-xxx 1/1 Running 0 2d</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="prompt">$</span>
+                                <span class="command">docker ps</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">CONTAINER ID IMAGE STATUS</span>
+                            </div>
+                            <div class="terminal-line">
+                                <span class="output">abc123 nginx:latest Up 2 hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">About Me</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>
+                        I'm a passionate DevOps Engineer and SRE with expertise in cloud infrastructure, 
+                        automation, and database management. Currently working at ARUS, I specialize in 
+                        building Packer images for GCP and AWS AMI, and implementing infrastructure as code with Terraform.
+                    </p>
+                    <p>
+                        With hands-on experience in YugabyteDB, YBA (YugabyteDB Anywhere), PostgreSQL, and 
+                        monitoring solutions like Prometheus, Grafana, and Dynatrace, I help teams build 
+                        scalable and reliable systems. I'm always learning and growing in the DevOps space.
+                    </p>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <span class="stat-number">6+</span>
+                            <span class="stat-label">GitHub Repositories</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">Multi-Cloud</span>
+                            <span class="stat-label">AWS & GCP</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">SRE</span>
+                            <span class="stat-label">Site Reliability</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="profile-image-container">
+                        <img src="images/profile.jpg" alt="Adarsha D Shetty - DevOps Engineer" class="profile-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+        <div class="container">
+            <h2 class="section-title">Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fab fa-docker"></i>
+                        Containerization & Orchestration
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Docker</span>
+                        <span class="skill-item">Kubernetes</span>
+                        <span class="skill-item">Packer</span>
+                        <span class="skill-item">Vagrant</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fab fa-aws"></i>
+                        Cloud Platforms
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">AWS</span>
+                        <span class="skill-item">Azure</span>
+                        <span class="skill-item">Google Cloud</span>
+                        <span class="skill-item">Terraform</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-code-branch"></i>
+                        CI/CD & Automation
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Jenkins</span>
+                        <span class="skill-item">Travis CI</span>
+                        <span class="skill-item">Ansible</span>
+                        <span class="skill-item">Terraform</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-chart-line"></i>
+                        Monitoring & Logging
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Prometheus</span>
+                        <span class="skill-item">Grafana</span>
+                        <span class="skill-item">Dynatrace</span>
+                        <span class="skill-item">Kibana</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fab fa-linux"></i>
+                        Infrastructure
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">Linux</span>
+                        <span class="skill-item">Bash/Python</span>
+                        <span class="skill-item">Nginx</span>
+                        <span class="skill-item">Redis</span>
+                    </div>
+                </div>
+                
+                <div class="skill-category">
+                    <h3 class="category-title">
+                        <i class="fas fa-database"></i>
+                        Databases & Storage
+                    </h3>
+                    <div class="skill-items">
+                        <span class="skill-item">PostgreSQL</span>
+                        <span class="skill-item">MongoDB</span>
+                        <span class="skill-item">YugabyteDB</span>
+                        <span class="skill-item">YBA</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <h2 class="section-title">Featured Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Packer Image Automation</h3>
+                        <p class="project-description">
+                            Built automated Packer images for GCP and AWS AMI creation, streamlining 
+                            infrastructure deployment and ensuring consistent environments across cloud platforms.
+                        </p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Packer</span>
+                            <span class="tech-tag">AWS</span>
+                            <span class="tech-tag">GCP</span>
+                            <span class="tech-tag">HCL</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/adarshadshetty09" class="project-link">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> View Repo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">YugabyteDB & YBA Infrastructure</h3>
+                        <p class="project-description">
+                            Implemented YugabyteDB and YugabyteDB Anywhere (YBA) infrastructure using 
+                            Ansible automation for database management and deployment across cloud environments.
+                        </p>
+                        <div class="project-tech">
+                            <span class="tech-tag">YugabyteDB</span>
+                            <span class="tech-tag">YBA</span>
+                            <span class="tech-tag">Ansible</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/adarshadshetty09" class="project-link">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> View Repo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-image">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Multi-Cloud Monitoring Setup</h3>
+                        <p class="project-description">
+                            Implemented comprehensive monitoring solutions using Prometheus, Grafana, 
+                            and Dynatrace for multi-cloud infrastructure monitoring and alerting.
+                        </p>
+                        <div class="project-tech">
+                            <span class="tech-tag">Prometheus</span>
+                            <span class="tech-tag">Grafana</span>
+                            <span class="tech-tag">Dynatrace</span>
+                            <span class="tech-tag">Kibana</span>
+                        </div>
+                        <div class="project-links">
+                            <a href="https://github.com/adarshadshetty09" class="project-link">
+                                <i class="fab fa-github"></i> GitHub
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> View Repo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Let's Connect</h3>
+                    <p>
+                        I'm always interested in new opportunities and exciting DevOps projects. 
+                        Whether you have a question about infrastructure automation or just want to connect, feel free to reach out!
+                    </p>
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <i class="fas fa-envelope"></i>
+                            <span>adarshadshetty09@gmail.com</span>
+                        </div>
+                        <div class="contact-method">
+                            <i class="fas fa-phone"></i>
+                            <span>+91 7204957991</span>
+                        </div>
+                        <div class="contact-method">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>India</span>
+                        </div>
+                        <div class="contact-method">
+                            <i class="fas fa-building"></i>
+                            <span>ARUS - SRE</span>
+                        </div>
+                    </div>
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/adarsha-d-shetty-532909217/" class="social-link" target="_blank">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="https://github.com/adarshadshetty09" class="social-link" target="_blank">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="https://leetcode.com/u/AdarshaDShetty/" class="social-link" target="_blank">
+                            <i class="fas fa-code"></i>
+                        </a>
+                        <a href="https://www.hackerrank.com/profile/adarshadshetty18/" class="social-link" target="_blank">
+                            <i class="fab fa-hackerrank"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form>
+                        <div class="form-group">
+                            <input type="text" id="name" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" placeholder="Your Email" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="subject" name="subject" placeholder="Subject" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" name="message" placeholder="Your Message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Adarsha D Shetty - DevOps Engineer Portfolio. Built with passion for automation.</p>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#about">About</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#projects">Projects</a>
+                    <a href="#contact">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
