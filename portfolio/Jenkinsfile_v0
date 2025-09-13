@@ -1,0 +1,91 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Choose deployment environment')
+    }
+
+    environment {
+        IMAGE_NAME = 'shettyadarsha/myportfolio-app'
+        CONTAINER_NAME = 'my-portfolio'
+        PORT = '3090'
+        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-cred'
+    }
+
+    stages {
+        stage('📦 Project Details') {
+            steps {
+                echo '📦 Dockerize the portfolio, push to Docker Hub, and deploy it using Docker only.'
+            }
+        }
+
+        stage('🔄 Git Checkout') {
+            steps {
+                git branch: 'main', changelog: false, credentialsId: 'git-cred', poll: false, url: 'https://github.com/adarshadshetty09/Docker.git'
+            }
+        }
+
+        stage('🐳 Build Docker Image') {
+            steps {
+                dir('portpolio') {
+                    script {
+                        sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                    }
+                }
+            }
+        }
+
+        stage('🔍 Security Scan') {
+            steps {
+                // Install Trivy on Jenkins agent or use pre-installed Docker image
+                sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_NAME}:${BUILD_NUMBER} || echo 'Vulnerabilities found. Please review.'"
+            }
+        }
+
+        stage('📤 Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
+                        sh "docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
+                        sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
+                        sh "docker push ${IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('🛑 Approval for Production') {
+            when {
+                expression { params.ENVIRONMENT == 'prod' }
+            }
+            steps {
+                input message: "🚨 Are you sure you want to deploy to PRODUCTION?"
+            }
+        }
+
+        stage('🚀 Deploy Docker Container') {
+            steps {
+                script {
+                    sh """
+                        echo "Stopping existing container (if running)..."
+                        docker stop ${CONTAINER_NAME} || true
+                        docker rm ${CONTAINER_NAME} || true
+
+                        echo "Starting new container..."
+                        docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${BUILD_NUMBER}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment completed successfully to ${params.ENVIRONMENT}"
+        }
+        failure {
+            echo "❌ Deployment failed. Please check the logs."
+        }
+    }
+}
+
