@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+    
+    environment {
+        IMAGE_NAME = 'shettyadarsha/myportfolio-app'
+        CONTAINER_NAME = 'my-portfolio'
+        PORT = '3090'
+    }   
+    stages {
+        stage('Project Detail') {
+            steps {
+                echo '📦 Dockerize the portfolio, push to Docker Hub, and redeploy it.'
+            }
+        }
+        stage("Git Check-Out"){
+            steps {
+                git branch: 'main', changelog: false, credentialsId: 'git-cred', poll: false, url: 'https://github.com/adarshadshetty09/Docker.git'
+            }
+        }
+        stage("Build the Docker Image"){
+            steps {
+                dir('portpolio'){
+                    sh 'docker build -t portfolio-app .'
+                }
+            }
+        }
+        stage("Deploy the Docker Image"){
+            steps {
+                dir('portpolio'){
+                    sh 'docker run -d -p 3090:80 --name my-portfolio portfolio-app'
+                }
+            }
+        }
+    }
+}
+
