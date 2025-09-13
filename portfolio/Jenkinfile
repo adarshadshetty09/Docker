@@ -5,6 +5,7 @@ pipeline {
         IMAGE_NAME = 'shettyadarsha/myportfolio-app'
         CONTAINER_NAME = 'my-portfolio'
         PORT = '3090'
+        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-cred' // Jenkins credentials ID
     }   
     stages {
         stage('Project Detail') {
@@ -24,11 +25,25 @@ pipeline {
                 }
             }
         }
+        
+        stage('Push the docker image to a docker-hub'){
+            steps {
+                sh "docker tag portfolio-app ${IMAGE_NAME}:latest"
+                withDockerRegistry(url: 'https://index.docker.io/v1/', credentialsId: 'docker-cred') {
+                    sh "docker push ${IMAGE_NAME}:latest"
+                    
+                }
+                
+            }
+            
+        }
+
         stage("Deploy the Docker Image"){
             steps {
-                dir('portpolio'){
-                    sh 'docker run -d -p 3090:80 --name my-portfolio portfolio-app'
-                }
+                sh """
+                  docker rm -f ${CONTAINER_NAME} || true
+                  docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:latest
+                """
             }
         }
     }
