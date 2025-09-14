@@ -287,3 +287,18 @@ If you have any questions or need help customizing your portfolio:
 **Happy coding! 🚀**
 
 *Built with ❤️ for the DevOps community*
+
+
+
+
+## 📸 Portfolio Screenshots
+
+### Desktop View
+![Screenshot 1](images/screenshot1.png)
+
+### Tablet View
+![Screenshot 2](images/screenshot2.png)
+
+### Mobile View
+![Screenshot 3](images/screenshot3.png)
+
