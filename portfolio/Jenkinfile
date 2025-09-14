@@ -13,13 +13,17 @@ pipeline {
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
         string(name: 'DOCKER_PORT', defaultValue: '3090', description: 'Port to expose the app (non-prod)')
+        string(name: 'DEPLOY_ENV', defaultValue: 'dev', description: 'Deployment environment: dev/stage/prod')
     }
 
     environment {
-        REGISTRY = "shettyadarsha"
-        IMAGE_NAME = "portfolio-app"
-        APP_PORT = "80"
-        LB_PORT = "${params.DOCKER_PORT}"
+        REGISTRY     = "shettyadarsha"
+        IMAGE_NAME   = "portfolio-app"
+        APP_PORT     = "80"
+        LB_PORT      = "${params.DOCKER_PORT}"
+        BLUE         = "portfolio_blue"
+        GREEN        = "portfolio_green"
+        NGINX        = "portfolio_nginx"
     }
 
     stages {
@@ -32,13 +36,13 @@ pipeline {
             }
         }
 
-        stage("List all the file in this Git Repo") {
+        stage("List all files in Git Repo") {
             steps {
                 sh "ls -lart"
             }
         }
 
-        stage("List all the files inside the Portfolio Project") {
+        stage("List files inside Portfolio Project") {
             steps {
                 dir('portfolio') {
                     sh "ls -lart"
@@ -72,7 +76,7 @@ pipeline {
                     steps {
                         dir("portfolio") {
                             script {
-                                echo "Building Docker image . . ."
+                                echo "Building Docker image..."
                                 sh """
                                     docker build -t $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} .
                                     docker tag $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} $REGISTRY/$IMAGE_NAME:${COMMIT_HASH}
@@ -86,7 +90,7 @@ pipeline {
                 stage('Security Scan') {
                     steps {
                         script {
-                            echo "Scanning Docker image for vulnerabilities..."
+                            echo "Scanning Docker image..."
                             sh """
                                 trivy image --exit-code 0 --severity HIGH,CRITICAL $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} || true
                             """
@@ -108,27 +112,74 @@ pipeline {
             }
         }
 
-        // ✅ NEW STAGE: Deploy latest image by removing previous container
-        stage('Deploy Docker Container') {
+        //  Blue-Green Deployment (Production Only)
+        stage('Blue-Green Deploy (Prod Only)') {
+            when {
+                expression { return params.DEPLOY_ENV == "prod" }
+            }
             steps {
                 script {
-                    def containerName = "${IMAGE_NAME}-container"
+                    echo "Performing Blue-Green Deployment behind NGINX..."
 
-                    echo "Stopping and removing previous container (if exists)..."
+                    def active = sh(
+                        script: "docker ps --format '{{.Names}}' | grep -E '${BLUE}|${GREEN}' || true",
+                        returnStdout: true
+                    ).trim()
+
+                    def target = (active == BLUE) ? GREEN : BLUE
+
+                    echo "Currently active: ${active}. Deploying to: ${target}"
+
+                    // Start target container
                     sh """
-                        docker stop $containerName || true
-                        docker rm $containerName || true
+                        docker rm -f ${target} || true
+                        docker run -d --name ${target} --network app_net $REGISTRY/$IMAGE_NAME:latest
                     """
 
-                    echo "Pulling latest image from Docker Hub..."
-                    sh "docker pull $REGISTRY/$IMAGE_NAME:latest"
-
-                    echo "Running new container..."
+                    // Generate new NGINX config
                     sh """
-                        docker run -d \
-                            --name $containerName \
-                            -p $LB_PORT:$APP_PORT \
-                            $REGISTRY/$IMAGE_NAME:latest
+                        mkdir -p nginx_conf
+                        cat > nginx_conf/nginx.conf <<EOF
+                        events {}
+                        http {
+                            upstream portfolio {
+                                server ${target}:${APP_PORT};
+                            }
+
+                            server {
+                                listen ${LB_PORT};
+                                location / {
+                                    proxy_pass http://portfolio;
+                                }
+                            }
+                        }
+EOF
+                    """
+
+                    // Run/update NGINX
+                    sh """
+                        docker rm -f ${NGINX} || true
+                        docker run -d --name ${NGINX} -p ${LB_PORT}:${LB_PORT} \\
+                            --network app_net \\
+                            -v \$(pwd)/nginx_conf/nginx.conf:/etc/nginx/nginx.conf \\
+                            nginx:latest
+                    """
+                }
+            }
+        }
+
+        // Simple Docker Deployment (Dev/Stage)
+        stage('Deploy (Dev/Stage)') {
+            when {
+                expression { return params.DEPLOY_ENV != "prod" }
+            }
+            steps {
+                script {
+                    echo "🚀 Deploying to ${params.DEPLOY_ENV} environment..."
+                    def containerName = "${IMAGE_NAME}-container"
+                    sh """
+                        docker rm -f $containerName || true
+                        docker run -d --name $containerName -p $LB_PORT:$APP_PORT $REGISTRY/$IMAGE_NAME:latest
                     """
                 }
             }
@@ -137,7 +188,7 @@ pipeline {
         stage('Clean Old Images') {
             steps {
                 script {
-                    echo "Cleaning up unused Docker images..."
+                    echo "🧹 Cleaning unused Docker images..."
                     sh "docker image prune -af || true"
                 }
             }
