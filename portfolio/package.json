@@ -1,0 +1,19 @@
+{
+  "name": "portfolio",
+  "version": "1.0.0",
+  "description": "A modern, responsive portfolio website designed specifically for DevOps engineers. Features a sleek dark theme with DevOps-focused color scheme, interactive animations, and comprehensive sections showcasing technical skills and projects.",
+  "main": "script.js",
+  "scripts": {
+    "lint": "eslint script.js",
+    "htmlvalidate": "htmlhint index.html",
+    "test": "npm run lint && npm run htmlvalidate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^9.35.0",
+    "htmlhint": "^1.7.0"
+  }
+}
+
