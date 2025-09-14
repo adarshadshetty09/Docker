@@ -130,3 +130,4 @@ async function syncContactForm() {
   // when the user comes back online
   console.log('Syncing contact form submissions...');
 }
+
