@@ -1,91 +1,203 @@
 pipeline {
-    agent any
+    agent any 
+
+    tools {
+        nodejs "Node20"
+    }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '2'))
+        timestamps()
+    }
 
     parameters {
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Choose deployment environment')
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Git branch to build')
+        string(name: 'DOCKER_PORT', defaultValue: '3090', description: 'Port to expose the app (non-prod)')
+        string(name: 'DEPLOY_ENV', defaultValue: 'dev', description: 'Deployment environment: dev/stage/prod')
     }
 
     environment {
-        IMAGE_NAME = 'shettyadarsha/myportfolio-app'
-        CONTAINER_NAME = 'my-portfolio'
-        PORT = '3090'
-        DOCKERHUB_CREDENTIALS_ID = 'dockerhub-cred'
+        REGISTRY     = "shettyadarsha"
+        IMAGE_NAME   = "portfolio-app"
+        APP_PORT     = "80"
+        LB_PORT      = "${params.DOCKER_PORT}"
+        BLUE         = "portfolio_blue"
+        GREEN        = "portfolio_green"
+        NGINX        = "portfolio_nginx"
     }
 
     stages {
-        stage('📦 Project Details') {
+        stage('Checkout') {
             steps {
-                echo '📦 Dockerize the portfolio, push to Docker Hub, and deploy it using Docker only.'
+                git branch: "${params.BRANCH_NAME}", 
+                    changelog: false, 
+                    poll: false, 
+                    url: 'https://github.com/adarshadshetty09/Docker.git'
             }
         }
 
-        stage('🔄 Git Checkout') {
+        stage("List all files in Git Repo") {
             steps {
-                git branch: 'main', changelog: false, credentialsId: 'git-cred', poll: false, url: 'https://github.com/adarshadshetty09/Docker.git'
+                sh "ls -lart"
             }
         }
 
-        stage('🐳 Build Docker Image') {
+        stage("List files inside Portfolio Project") {
             steps {
-                dir('portpolio') {
-                    script {
-                        sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                dir('portfolio') {
+                    sh "ls -lart"
+                }
+            }
+        }
+
+        stage('Get Commit Hash') {
+            steps {
+                script {
+                    env.COMMIT_HASH = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                }
+                echo "Commit Hash: ${env.COMMIT_HASH}"
+            }
+        }
+
+        stage('Lint & Security Scan') {
+            parallel {
+                stage('Lint Dockerfile') {
+                    steps {
+                        dir("portfolio") {
+                            script {
+                                echo "Running Hadolint..."
+                                sh 'hadolint Dockerfile || true'
+                            }
+                        }
+                    }
+                }
+
+                stage('Build Docker Image') {
+                    steps {
+                        dir("portfolio") {
+                            script {
+                                echo "Building Docker image..."
+                                sh """
+                                    docker build -t $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} .
+                                    docker tag $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} $REGISTRY/$IMAGE_NAME:${COMMIT_HASH}
+                                    docker tag $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} $REGISTRY/$IMAGE_NAME:latest
+                                """
+                            }
+                        }
+                    }
+                }
+
+                stage('Security Scan') {
+                    steps {
+                        script {
+                            echo "Scanning Docker image..."
+                            sh """
+                                trivy image --exit-code 0 --severity HIGH,CRITICAL $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER} || true
+                            """
+                        }
                     }
                 }
             }
         }
 
-        stage('🔍 Security Scan') {
+        stage('Push to Artifactory') {
             steps {
-                // Install Trivy on Jenkins agent or use pre-installed Docker image
-                sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${IMAGE_NAME}:${BUILD_NUMBER} || echo 'Vulnerabilities found. Please review.'"
-            }
-        }
-
-        stage('📤 Push Docker Image to Docker Hub') {
-            steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKERHUB_CREDENTIALS_ID) {
-                        sh "docker tag ${IMAGE_NAME}:${BUILD_NUMBER} ${IMAGE_NAME}:latest"
-                        sh "docker push ${IMAGE_NAME}:${BUILD_NUMBER}"
-                        sh "docker push ${IMAGE_NAME}:latest"
-                    }
-                }
-            }
-        }
-
-        stage('🛑 Approval for Production') {
-            when {
-                expression { params.ENVIRONMENT == 'prod' }
-            }
-            steps {
-                input message: "🚨 Are you sure you want to deploy to PRODUCTION?"
-            }
-        }
-
-        stage('🚀 Deploy Docker Container') {
-            steps {
-                script {
+                withDockerRegistry(credentialsId: 'docker-cred', url: 'https://index.docker.io/v1/') {
                     sh """
-                        echo "Stopping existing container (if running)..."
-                        docker stop ${CONTAINER_NAME} || true
-                        docker rm ${CONTAINER_NAME} || true
-
-                        echo "Starting new container..."
-                        docker run -d -p ${PORT}:80 --name ${CONTAINER_NAME} ${IMAGE_NAME}:${BUILD_NUMBER}
+                        docker push $REGISTRY/$IMAGE_NAME:${BUILD_NUMBER}
+                        docker push $REGISTRY/$IMAGE_NAME:${COMMIT_HASH}
+                        docker push $REGISTRY/$IMAGE_NAME:latest
                     """
                 }
             }
         }
-    }
 
-    post {
-        success {
-            echo "✅ Deployment completed successfully to ${params.ENVIRONMENT}"
+        // 🔵🟢 Blue-Green Deployment (Production Only)
+        stage('Blue-Green Deploy (Prod Only)') {
+            when {
+                expression { return params.DEPLOY_ENV == "prod" }
+            }
+            steps {
+                script {
+                    echo "🔵🟢 Performing Blue-Green Deployment behind NGINX..."
+
+                    def active = sh(
+                        script: "docker ps --format '{{.Names}}' | grep -E '${BLUE}|${GREEN}' || true",
+                        returnStdout: true
+                    ).trim()
+
+                    def target = (active == BLUE) ? GREEN : BLUE
+
+                    echo "Currently active: ${active}. Deploying to: ${target}"
+
+                    // Start target container
+                    sh """
+                        docker rm -f ${target} || true
+                        docker run -d --name ${target} --network app_net $REGISTRY/$IMAGE_NAME:latest
+                    """
+
+                    // Generate new NGINX config
+                    sh """
+                        mkdir -p nginx_conf
+                        cat > nginx_conf/nginx.conf <<EOF
+                        events {}
+                        http {
+                            upstream portfolio {
+                                server ${target}:${APP_PORT};
+                            }
+
+                            server {
+                                listen ${LB_PORT};
+                                location / {
+                                    proxy_pass http://portfolio;
+                                }
+                            }
+                        }
+EOF
+                    """
+
+                    // Run/update NGINX
+                    sh """
+                        docker rm -f ${NGINX} || true
+                        docker run -d --name ${NGINX} -p ${LB_PORT}:${LB_PORT} \\
+                            --network app_net \\
+                            -v \$(pwd)/nginx_conf/nginx.conf:/etc/nginx/nginx.conf \\
+                            nginx:latest
+                    """
+                }
+            }
         }
-        failure {
-            echo "❌ Deployment failed. Please check the logs."
+
+        // 🧪 Simple Docker Deployment (Dev/Stage)
+        stage('Deploy (Dev/Stage)') {
+            when {
+                expression { return params.DEPLOY_ENV != "prod" }
+            }
+            steps {
+                script {
+                    echo "🚀 Deploying to ${params.DEPLOY_ENV} environment..."
+                    def containerName = "${IMAGE_NAME}-container"
+                    sh """
+                        docker rm -f $containerName || true
+                        docker run -d --name $containerName -p $LB_PORT:$APP_PORT $REGISTRY/$IMAGE_NAME:latest
+                    """
+                }
+            }
+        }
+
+        stage('Clean Old Images') {
+            steps {
+                script {
+                    echo "🧹 Cleaning unused Docker images..."
+                    sh "docker image prune -af || true"
+                }
+            }
+        }
+
+        stage('Workspace Cleanup') {
+            steps {
+                cleanWs()
+            }
         }
     }
 }
-
