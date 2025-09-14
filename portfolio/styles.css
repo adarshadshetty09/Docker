@@ -5,6 +5,36 @@
     box-sizing: border-box;
 }
 
+/* Skip Link for Accessibility */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: var(--primary-color);
+    color: var(--background-dark);
+    padding: 8px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: 600;
+    z-index: 10000;
+    transition: top 0.3s ease;
+}
+
+.skip-link:focus {
+    top: 6px;
+}
+
+/* Focus styles for better accessibility */
+*:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+*:focus:not(:focus-visible) {
+    outline: none;
+}
+
 :root {
     /* DevOps Color Palette */
     --primary-color: #00d4aa;
@@ -139,6 +169,19 @@ body {
     display: none;
     flex-direction: column;
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.hamburger:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.hamburger:focus {
+    background-color: rgba(0, 212, 170, 0.2);
 }
 
 .bar {
@@ -157,6 +200,8 @@ body {
     background: linear-gradient(135deg, var(--background-dark) 0%, var(--background-light) 100%);
     position: relative;
     overflow: hidden;
+    will-change: transform;
+    contain: layout style paint;
 }
 
 .hero::before {
@@ -439,6 +484,8 @@ section {
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+    contain: layout style;
 }
 
 .skill-category:hover {
@@ -500,6 +547,8 @@ section {
     overflow: hidden;
     border: 1px solid var(--border-color);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+    contain: layout style;
 }
 
 .project-card:hover {
@@ -835,6 +884,33 @@ section {
 .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .fade-in {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+    
+    .hero {
+        will-change: auto;
+    }
+    
+    .skill-category,
+    .project-card {
+        will-change: auto;
+    }
 }
 
 /* Loading animation for terminal */

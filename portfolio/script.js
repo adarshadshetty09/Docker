@@ -2,12 +2,47 @@
 const hamburger = document.querySelector('.hamburger');
 const navMenu = document.querySelector('.nav-menu');
 const navLinks = document.querySelectorAll('.nav-link');
-const contactForm = document.querySelector('.contact-form form');
+const contactForm = document.querySelector('#contact-form');
+
+// Performance optimization: Check for reduced motion preference
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Intersection Observer for better performance
+const scrollObserverOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+};
+
+// Lazy loading for images
+const imageObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            img.src = img.dataset.src || img.src;
+            img.classList.remove('lazy');
+            observer.unobserve(img);
+        }
+    });
+}, {
+    rootMargin: '50px'
+});
 
 // Mobile Navigation Toggle
 hamburger.addEventListener('click', () => {
+    const isActive = hamburger.classList.contains('active');
     hamburger.classList.toggle('active');
     navMenu.classList.toggle('active');
+    
+    // Update ARIA attributes for accessibility
+    hamburger.setAttribute('aria-expanded', !isActive);
+    
+    // Focus management for accessibility
+    if (!isActive) {
+        const firstLink = navMenu.querySelector('.nav-link');
+        if (firstLink) {
+            firstLink.focus();
+        }
+    }
 });
 
 // Close mobile menu when clicking on a link
@@ -15,6 +50,7 @@ navLinks.forEach(link => {
     link.addEventListener('click', () => {
         hamburger.classList.remove('active');
         navMenu.classList.remove('active');
+        hamburger.setAttribute('aria-expanded', 'false');
     });
 });
 
@@ -27,10 +63,16 @@ navLinks.forEach(link => {
         
         if (targetSection) {
             const offsetTop = targetSection.offsetTop - 70; // Account for fixed navbar
+            
+            // Respect user's motion preferences
+            if (prefersReducedMotion) {
+                window.scrollTo(0, offsetTop);
+            } else {
             window.scrollTo({
                 top: offsetTop,
                 behavior: 'smooth'
             });
+            }
         }
     });
 });
@@ -69,18 +111,13 @@ window.addEventListener('scroll', () => {
 });
 
 // Scroll animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -50px 0px'
-};
-
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.classList.add('visible');
         }
     });
-}, observerOptions);
+}, scrollObserverOptions);
 
 // Observe elements for scroll animations
 document.addEventListener('DOMContentLoaded', () => {
@@ -102,39 +139,329 @@ function animateTerminal() {
     });
 }
 
-// Start terminal animation when page loads
-window.addEventListener('load', () => {
-    setTimeout(animateTerminal, 1000);
+// Initialize lazy loading for images
+document.addEventListener('DOMContentLoaded', () => {
+    const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+    lazyImages.forEach(img => {
+        imageObserver.observe(img);
+    });
 });
 
-// Contact form handling
+// Start terminal animation when page loads
+window.addEventListener('load', () => {
+    if (!prefersReducedMotion) {
+    setTimeout(animateTerminal, 1000);
+    }
+});
+
+// Enhanced contact form handling
 if (contactForm) {
-    contactForm.addEventListener('submit', (e) => {
+    console.log('Contact form found and initialized');
+    // Real-time validation
+    const inputs = contactForm.querySelectorAll('input, textarea');
+    inputs.forEach(input => {
+        input.addEventListener('blur', validateField);
+        input.addEventListener('input', clearFieldError);
+    });
+
+    contactForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        console.log('Form submission started');
         
         // Get form data
         const formData = new FormData(contactForm);
-        const name = formData.get('name');
-        const email = formData.get('email');
-        const subject = formData.get('subject');
-        const message = formData.get('message');
+        const data = {
+            name: formData.get('name').trim(),
+            email: formData.get('email').trim(),
+            subject: formData.get('subject').trim(),
+            message: formData.get('message').trim()
+        };
         
-        // Simple validation
-        if (!name || !email || !subject || !message) {
-            showNotification('Please fill in all fields', 'error');
+        console.log('Form data:', data);
+        
+        // Validate all fields
+        if (!validateForm(data)) {
             return;
         }
         
-        if (!isValidEmail(email)) {
-            showNotification('Please enter a valid email address', 'error');
-            return;
-        }
+        // Show loading state
+        const submitBtn = contactForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Sending...';
+        submitBtn.disabled = true;
         
-        // Simulate form submission
-        showNotification('Message sent successfully! I\'ll get back to you soon.', 'success');
-        contactForm.reset();
+        try {
+            // Check if online
+            if (navigator.onLine) {
+                // Submit form using real service
+                const result = await submitContactForm(data);
+                showNotification(result.message, 'success');
+                contactForm.reset();
+            } else {
+                // Store for later when online
+                storeOfflineMessage(data);
+                showNotification('Message saved! Will send when you\'re back online.', 'info');
+                contactForm.reset();
+            }
+        } catch (error) {
+            console.error('Form submission error:', error);
+            showNotification('Failed to send message. Please try again.', 'error');
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
     });
+} else {
+    console.error('Contact form not found! Check if the form element exists in HTML.');
 }
+
+// Form validation functions
+function validateForm(data) {
+    let isValid = true;
+    
+    if (!data.name) {
+        showFieldError('name', 'Name is required');
+        isValid = false;
+    }
+    
+    if (!data.email) {
+        showFieldError('email', 'Email is required');
+        isValid = false;
+    } else if (!isValidEmail(data.email)) {
+        showFieldError('email', 'Please enter a valid email address');
+        isValid = false;
+    }
+    
+    if (!data.subject) {
+        showFieldError('subject', 'Subject is required');
+        isValid = false;
+    }
+    
+    if (!data.message) {
+        showFieldError('message', 'Message is required');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+function validateField(e) {
+    const field = e.target;
+    const value = field.value.trim();
+    
+    switch (field.name) {
+        case 'name':
+            if (!value) {
+                showFieldError(field.name, 'Name is required');
+            }
+            break;
+        case 'email':
+            if (!value) {
+                showFieldError(field.name, 'Email is required');
+            } else if (!isValidEmail(value)) {
+                showFieldError(field.name, 'Please enter a valid email address');
+            }
+            break;
+        case 'subject':
+            if (!value) {
+                showFieldError(field.name, 'Subject is required');
+            }
+            break;
+        case 'message':
+            if (!value) {
+                showFieldError(field.name, 'Message is required');
+            }
+            break;
+    }
+}
+
+function showFieldError(fieldName, message) {
+    const field = contactForm.querySelector(`[name="${fieldName}"]`);
+    const formGroup = field.closest('.form-group');
+    
+    // Remove existing error
+    const existingError = formGroup.querySelector('.field-error');
+    if (existingError) {
+        existingError.remove();
+    }
+    
+    // Add error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'field-error';
+    errorDiv.textContent = message;
+    errorDiv.style.color = 'var(--error-color)';
+    errorDiv.style.fontSize = '0.875rem';
+    errorDiv.style.marginTop = '0.25rem';
+    
+    formGroup.appendChild(errorDiv);
+    field.style.borderColor = 'var(--error-color)';
+}
+
+function clearFieldError(e) {
+    const field = e.target;
+    const formGroup = field.closest('.form-group');
+    const error = formGroup.querySelector('.field-error');
+    
+    if (error) {
+        error.remove();
+        field.style.borderColor = '';
+    }
+}
+
+// Real form submission using Formspree
+async function submitContactForm(data) {
+    console.log('Submitting to Formspree:', data);
+    try {
+        // Method 1: Using FormData (preferred by Formspree)
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('email', data.email);
+        formData.append('subject', data.subject);
+        formData.append('message', data.message);
+        formData.append('_replyto', data.email);
+        formData.append('_subject', `Portfolio Contact: ${data.subject}`);
+        
+        console.log('Sending request to Formspree...');
+        const response = await fetch('https://formspree.io/f/meoldbpz', {
+            method: 'POST',
+            body: formData
+        });
+        
+        console.log('Formspree response status:', response.status);
+        
+        if (response.ok) {
+            return { success: true, message: 'Message sent successfully! I\'ll get back to you soon.' };
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Form submission failed');
+        }
+    } catch (error) {
+        console.error('Formspree error:', error);
+        
+        // Fallback: Try JSON method
+        try {
+            const response = await fetch('https://formspree.io/f/meoldbpz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: data.name,
+                    email: data.email,
+                    subject: data.subject,
+                    message: data.message,
+                    _replyto: data.email,
+                    _subject: `Portfolio Contact: ${data.subject}`
+                })
+            });
+            
+            if (response.ok) {
+                return { success: true, message: 'Message sent successfully! I\'ll get back to you soon.' };
+            } else {
+                throw new Error('Form submission failed');
+            }
+        } catch (fallbackError) {
+            console.error('Formspree fallback error:', fallbackError);
+            throw new Error('Unable to send message. Please try again or contact me directly at adarshadshetty09@gmail.com');
+        }
+    }
+    
+    // Option 2: Netlify Forms (if hosting on Netlify)
+    /*
+    try {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('email', data.email);
+        formData.append('subject', data.subject);
+        formData.append('message', data.message);
+        
+        const response = await fetch('/', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            return { success: true, message: 'Message sent successfully!' };
+        } else {
+            throw new Error('Form submission failed');
+        }
+    } catch (error) {
+        console.error('Netlify Forms error:', error);
+        throw error;
+    }
+    */
+    
+    // Option 3: EmailJS (Client-side email service)
+    /*
+    try {
+        // Initialize EmailJS with your credentials
+        emailjs.init('YOUR_PUBLIC_KEY');
+        
+        const templateParams = {
+            from_name: data.name,
+            from_email: data.email,
+            subject: data.subject,
+            message: data.message,
+            to_email: 'adarshadshetty09@gmail.com'
+        };
+        
+        const response = await emailjs.send(
+            'YOUR_SERVICE_ID',
+            'YOUR_TEMPLATE_ID',
+            templateParams
+        );
+        
+        if (response.status === 200) {
+            return { success: true, message: 'Message sent successfully!' };
+        } else {
+            throw new Error('EmailJS submission failed');
+        }
+    } catch (error) {
+        console.error('EmailJS error:', error);
+        throw error;
+    }
+    */
+}
+
+// Offline message storage
+function storeOfflineMessage(data) {
+    const messages = JSON.parse(localStorage.getItem('offlineMessages') || '[]');
+    messages.push({
+        ...data,
+        timestamp: new Date().toISOString()
+    });
+    localStorage.setItem('offlineMessages', JSON.stringify(messages));
+}
+
+// Send offline messages when back online
+window.addEventListener('online', () => {
+    const messages = JSON.parse(localStorage.getItem('offlineMessages') || '[]');
+    if (messages.length > 0) {
+        showNotification(`${messages.length} offline message(s) will be sent now.`, 'info');
+        // Process offline messages here
+        localStorage.removeItem('offlineMessages');
+    }
+});
+
+// Test function to verify form is working (remove in production)
+window.testContactForm = function() {
+    console.log('Testing contact form...');
+    console.log('Form element:', contactForm);
+    console.log('Form action:', contactForm ? contactForm.action : 'Not found');
+    console.log('Form method:', contactForm ? contactForm.method : 'Not found');
+    
+    if (contactForm) {
+        // Fill form with test data
+        contactForm.querySelector('[name="name"]').value = 'Test User';
+        contactForm.querySelector('[name="email"]').value = 'test@example.com';
+        contactForm.querySelector('[name="subject"]').value = 'Test Message';
+        contactForm.querySelector('[name="message"]').value = 'This is a test message to verify the contact form is working.';
+        
+        console.log('Test data filled. You can now submit the form manually.');
+    } else {
+        console.error('Contact form not found!');
+    }
+};
 
 // Email validation
 function isValidEmail(email) {

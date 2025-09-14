@@ -3,45 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Adarsha D Shetty - DevOps Engineer & SRE specializing in cloud infrastructure, automation, and monitoring. Building scalable solutions with Packer, Ansible, Terraform, and modern DevOps practices.">
+    <meta name="keywords" content="DevOps Engineer, SRE, Cloud Infrastructure, Automation, Kubernetes, Docker, AWS, GCP, Terraform, Ansible, Packer, Monitoring, Adarsha D Shetty">
+    <meta name="author" content="Adarsha D Shetty">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://adarshadshetty.dev/">
+    <meta property="og:title" content="Adarsha D Shetty - DevOps Engineer Portfolio">
+    <meta property="og:description" content="DevOps Engineer & SRE specializing in cloud infrastructure, automation, and monitoring. Building scalable solutions with modern DevOps practices.">
+    <meta property="og:image" content="https://adarshadshetty.dev/images/profile.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://adarshadshetty.dev/">
+    <meta property="twitter:title" content="Adarsha D Shetty - DevOps Engineer Portfolio">
+    <meta property="twitter:description" content="DevOps Engineer & SRE specializing in cloud infrastructure, automation, and monitoring.">
+    <meta property="twitter:image" content="https://adarshadshetty.dev/images/profile.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+
     <title>Adarsha D Shetty - DevOps Engineer Portfolio</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="styles.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+    <link rel="preload" href="images/profile.jpg" as="image">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" crossorigin="anonymous">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Adarsha D Shetty",
+        "jobTitle": "DevOps Engineer & SRE",
+        "description": "Passionate DevOps Engineer specializing in cloud infrastructure, automation, and monitoring",
+        "url": "https://adarshadshetty.dev",
+        "image": "https://adarshadshetty.dev/images/profile.jpg",
+        "email": "adarshadshetty09@gmail.com",
+        "telephone": "+91 7204957991",
+        "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "India"
+        },
+        "worksFor": {
+            "@type": "Organization",
+            "name": "ARUS"
+        },
+        "sameAs": [
+            "https://www.linkedin.com/in/adarsha-d-shetty-532909217/",
+            "https://github.com/adarshadshetty09",
+            "https://leetcode.com/u/AdarshaDShetty/",
+            "https://www.hackerrank.com/profile/adarshadshetty18/"
+        ],
+        "knowsAbout": [
+            "DevOps", "Site Reliability Engineering", "Cloud Infrastructure", 
+            "Docker", "Kubernetes", "AWS", "Google Cloud Platform", 
+            "Terraform", "Ansible", "Packer", "Monitoring", "Automation"
+        ]
+    }
+    </script>
 </head>
 <body>
+    <!-- Skip Navigation for Accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
         <div class="nav-container">
             <div class="nav-logo">
                 <span class="logo-text">DevOps</span>
             </div>
-            <ul class="nav-menu">
-                <li class="nav-item">
-                    <a href="#home" class="nav-link">Home</a>
+            <ul class="nav-menu" role="menubar">
+                <li class="nav-item" role="none">
+                    <a href="#home" class="nav-link" role="menuitem" aria-label="Go to home section">Home</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#about" class="nav-link">About</a>
+                <li class="nav-item" role="none">
+                    <a href="#about" class="nav-link" role="menuitem" aria-label="Go to about section">About</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#skills" class="nav-link">Skills</a>
+                <li class="nav-item" role="none">
+                    <a href="#skills" class="nav-link" role="menuitem" aria-label="Go to skills section">Skills</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#projects" class="nav-link">Projects</a>
+                <li class="nav-item" role="none">
+                    <a href="#projects" class="nav-link" role="menuitem" aria-label="Go to projects section">Projects</a>
                 </li>
-                <li class="nav-item">
-                    <a href="#contact" class="nav-link">Contact</a>
+                <li class="nav-item" role="none">
+                    <a href="#contact" class="nav-link" role="menuitem" aria-label="Go to contact section">Contact</a>
                 </li>
             </ul>
-            <div class="hamburger">
+            <button class="hamburger" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="nav-menu">
                 <span class="bar"></span>
                 <span class="bar"></span>
                 <span class="bar"></span>
-            </div>
+            </button>
         </div>
     </nav>
 
+    <!-- Main Content -->
+    <main id="main-content">
+    
     <!-- Hero Section -->
-    <section id="home" class="hero">
+    <section id="home" class="hero" role="banner">
         <div class="hero-container">
             <div class="hero-content">
                 <h1 class="hero-title">
@@ -53,8 +126,8 @@
                     Building scalable solutions with Packer, Ansible, Terraform, and modern DevOps practices.
                 </p>
                 <div class="hero-buttons">
-                    <a href="#projects" class="btn btn-primary">View My Work</a>
-                    <a href="#contact" class="btn btn-secondary">Get In Touch</a>
+                    <a href="#projects" class="btn btn-primary" aria-label="View my portfolio projects">View My Work</a>
+                    <a href="#contact" class="btn btn-secondary" aria-label="Get in touch with me">Get In Touch</a>
                 </div>
             </div>
             <div class="hero-visual">
@@ -97,9 +170,9 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="about">
+    <section id="about" class="about" role="region" aria-labelledby="about-heading">
         <div class="container">
-            <h2 class="section-title">About Me</h2>
+            <h2 id="about-heading" class="section-title">About Me</h2>
             <div class="about-content">
                 <div class="about-text">
                     <p>
@@ -129,7 +202,12 @@
                 </div>
                 <div class="about-image">
                     <div class="profile-image-container">
-                        <img src="images/profile.jpg" alt="Adarsha D Shetty - DevOps Engineer" class="profile-image">
+                        <img src="images/profile.jpg" 
+                             alt="Adarsha D Shetty - DevOps Engineer professional headshot" 
+                             class="profile-image"
+                             loading="lazy"
+                             width="200"
+                             height="200">
                     </div>
                 </div>
             </div>
@@ -356,7 +434,7 @@
                     </div>
                 </div>
                 <div class="contact-form">
-                    <form>
+                    <form id="contact-form" action="https://formspree.io/f/meoldbpz" method="POST">
                         <div class="form-group">
                             <input type="text" id="name" name="name" placeholder="Your Name" required>
                         </div>
@@ -375,9 +453,11 @@
             </div>
         </div>
     </section>
+    
+    </main>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <p>&copy; 2024 Adarsha D Shetty - DevOps Engineer Portfolio. Built with passion for automation.</p>
@@ -393,5 +473,38 @@
     </footer>
 
     <script src="script.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+    
+    <!-- Performance Monitoring -->
+    <script>
+        // Basic performance monitoring
+        window.addEventListener('load', () => {
+            const perfData = performance.getEntriesByType('navigation')[0];
+            const loadTime = perfData.loadEventEnd - perfData.loadEventStart;
+            console.log('Page load time:', loadTime + 'ms');
+            
+            // Send to analytics if available
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'page_load_time', {
+                    'value': Math.round(loadTime),
+                    'event_category': 'Performance'
+                });
+            }
+        });
+    </script>
 </body>
 </html>
