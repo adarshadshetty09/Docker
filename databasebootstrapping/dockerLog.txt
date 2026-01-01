@@ -1,0 +1,67 @@
+Sending build context to Docker daemon  5.632kB
+Step 1/2 : FROM postgres:18
+18: Pulling from library/postgres
+02d7611c4eae: Pulling fs layer
+9172e24e2f38: Pulling fs layer
+b96e97bb6a7e: Pulling fs layer
+2d949714b376: Pulling fs layer
+220a79c3dc48: Pulling fs layer
+0cd9f01fbe30: Pulling fs layer
+4346024d450e: Pulling fs layer
+923097c40912: Pulling fs layer
+af774b3ad574: Pulling fs layer
+cbc8979f5730: Pulling fs layer
+2968aa50182d: Pulling fs layer
+9532f2df07c4: Pulling fs layer
+4be82039e701: Pulling fs layer
+2d949714b376: Waiting
+220a79c3dc48: Waiting
+0cd9f01fbe30: Waiting
+4346024d450e: Waiting
+9532f2df07c4: Waiting
+4be82039e701: Waiting
+af774b3ad574: Waiting
+923097c40912: Waiting
+2968aa50182d: Waiting
+cbc8979f5730: Waiting
+9172e24e2f38: Download complete
+b96e97bb6a7e: Verifying Checksum
+b96e97bb6a7e: Download complete
+2d949714b376: Verifying Checksum
+2d949714b376: Download complete
+220a79c3dc48: Verifying Checksum
+220a79c3dc48: Download complete
+02d7611c4eae: Verifying Checksum
+02d7611c4eae: Download complete
+0cd9f01fbe30: Verifying Checksum
+0cd9f01fbe30: Download complete
+4346024d450e: Download complete
+923097c40912: Download complete
+2968aa50182d: Download complete
+cbc8979f5730: Verifying Checksum
+cbc8979f5730: Download complete
+4be82039e701: Verifying Checksum
+4be82039e701: Download complete
+9532f2df07c4: Download complete
+af774b3ad574: Verifying Checksum
+af774b3ad574: Download complete
+02d7611c4eae: Pull complete
+9172e24e2f38: Pull complete
+b96e97bb6a7e: Pull complete
+2d949714b376: Pull complete
+220a79c3dc48: Pull complete
+0cd9f01fbe30: Pull complete
+4346024d450e: Pull complete
+923097c40912: Pull complete
+af774b3ad574: Pull complete
+cbc8979f5730: Pull complete
+2968aa50182d: Pull complete
+9532f2df07c4: Pull complete
+4be82039e701: Pull complete
+Digest: sha256:bfe50b2b0ddd9b55eadedd066fe24c7c6fe06626185b73358c480ea37868024d
+Status: Downloaded newer image for postgres:18
+ ---> b3580042f864
+Step 2/2 : COPY seed1.sql /docker-entrypoint-initdb.d/
+ ---> 08a0c96e8e49
+Successfully built 08a0c96e8e49
+Successfully tagged databasebootstrapping_db:latest
